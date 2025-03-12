@@ -1,0 +1,70 @@
+.cadastro-funcionario {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  margin-bottom: 20px;
+}
+
+.cadastro-funcionario h2 {
+  text-align: center;
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.input {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease-in-out;
+  margin-bottom: 5px;
+}
+
+.input:focus {
+  border-color: #007bff;
+}
+
+.cad-button {
+  display: flex;
+  justify-content: center;
+}
+
+.cad-button button{
+  width: 320px;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.button:hover {
+  background-color: #218838;
+}
+
+/* Responsividade */
+@media (max-width: 500px) {
+  .cadastro-funcionario {
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  .button {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}

@@ -1,0 +1,10 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5em;
+}
+
+.logo {
+  width: 20em;
+}

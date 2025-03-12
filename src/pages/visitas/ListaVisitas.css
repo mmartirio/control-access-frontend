@@ -1,0 +1,67 @@
+
+.lista-visitas-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.search {
+  display: flex;
+  justify-content: center;
+}
+
+.search input {
+  width: 25%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+}
+
+.visitas-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.visitas-table th, .visitas-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.visitas-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.visitas-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.visitas-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.visitas-table td {
+  font-size: 14px;
+}
+
+.visitas-table {
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .visitas-table th, .visitas-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,55 @@
+.cria-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.cria-container form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .5em;
+  flex-wrap: wrap;
+}
+
+.cria-container form input {
+  display: block;
+  width: 18em;
+  height: 1.5em;
+  outline: none;
+  cursor: pointer;
+}
+
+.cria-container select {
+  display: block;
+  height: 2em;
+  width: 18.5em;
+  outline: none;
+  cursor: pointer;
+}
+
+.cria-container form button {
+  background-color: rgb(113, 223, 40);
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #050505;
+}
+
+.cria-container form button:hover {
+  background-color: rgb(89, 177, 31);
+}
+
+.cria-container form button:active {
+  background-color: rgb(58, 141, 3);
+}
+
+.form-group textarea{
+  display: block;
+  height: 6em;
+  width: 18.5em;
+  resize: none;
+  outline: none;
+  cursor: pointer;
+}
