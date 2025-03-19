@@ -23,11 +23,13 @@
 
 /* Estilização do input de pesquisa */
 .searchQuery input {
-  width: 80%;
+  width: 30em;
   padding: 10px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  cursor: pointer;
+  outline: none;
 }
 
 /* Estilização da tabela */

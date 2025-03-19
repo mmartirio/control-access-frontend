@@ -1,0 +1,67 @@
+/* Estilos gerais */
+.edita-funcionario-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.edita-funcionario-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Estilos do formulário */
+.edita-funcionario-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.edita-funcionario-form input,
+.edita-funcionario-form select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+/* Estilos dos checkboxes */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.checkbox-group label {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Estilos do botão */
+.edita-funcionario-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.edita-funcionario-button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .edita-funcionario-container {
+    width: 90%;
+  }
+}

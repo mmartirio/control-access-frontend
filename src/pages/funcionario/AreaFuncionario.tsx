@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GenericModal from "../../components/GenericModal";
 import CadastroFuncionario from "./CadastroFuncionario";
-import "./AreaFuncionario.css";
 import ListaFuncionarios from "./ListaFuncionario";
+import EditaFuncionario from "./EditaFuncionario";
+import "./AreaFuncionario.css";
 
-type Role = "ROLE_ADMIN" | "ROLE_USER"; // Usando apenas os papéis definidos
+
+type Role = "ROLE_ADMIN" | "ROLE_USER";
 
 interface Funcionario {
   name: string;
@@ -52,10 +54,14 @@ const AreaFuncionario = () => {
           <h2>Bem-vindo</h2>
         </div>
         <ul>
-          <li><button onClick={() => handleLinkClick(<ListaFuncionarios />)}></button></li>
           <li>
             <button onClick={() => openModal(<CadastroFuncionario setFuncionarios={setFuncionarios} />)}>
               Cadastrar Funcionário
+            </button>
+          </li>
+          <li>
+            <button onClick={() => openModal(<EditaFuncionario setFuncionarios={setFuncionarios} funcionarios={funcionarios} />)}>
+              Editar Funcionário
             </button>
           </li>
           <li className="closed">

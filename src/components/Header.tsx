@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import GenericModal from "../components/GenericModal";
 import CadastroVisitante from "../pages/visitantes/CadastroVisitante";
 import ListaVisitas from "../pages/visitas/ListaVisitas";
@@ -13,6 +13,15 @@ const Header = () => {
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
   const [activeComponent, setActiveComponent] = useState<React.ReactNode>(<Home />);
   const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+
+  // Verificar o role do usuário no sessionStorage
+  useEffect(() => {
+    const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+    if (user?.role === "ROLE_ADMIN") {
+      setIsAdmin(true); 
+    }
+  }, []);
 
   const openModal = (content: React.ReactNode) => {
     setModalContent(content);
@@ -21,7 +30,7 @@ const Header = () => {
 
   const handleLinkClick = (component: React.ReactNode) => {
     setActiveComponent(component);
-    setModalOpen(false); 
+    setModalOpen(false);
   };
 
   if (isAdmin) {
@@ -35,12 +44,12 @@ const Header = () => {
           <h2>Bem-vindo</h2>
         </div>
         <ul>
-        <li><button onClick={() => handleLinkClick(<Home />)}>Home</button></li>
+          <li><button onClick={() => handleLinkClick(<Home />)}>Home</button></li>
           <li><button onClick={() => openModal(<CadastroVisitante />)}>Cadastrar Visitante</button></li>
           <li><button onClick={() => handleLinkClick(<ListaVisitas />)}>Lista de Visitas</button></li>
           <li><button onClick={() => handleLinkClick(<ListaVisitante />)}>Lista de Visitantes</button></li>
-          <li><button onClick={() => setIsAdmin(true)}>Área Administrador</button></li>
-          <li className='closed'><Link to="/">Sair</Link></li>
+          {!isAdmin && <li><button onClick={() => setIsAdmin(true)}>Área Administrador</button></li>}
+          <li className="closed"><Link to="/">Sair</Link></li>
         </ul>
       </nav>
 
