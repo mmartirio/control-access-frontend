@@ -54,16 +54,42 @@ table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-table tr:hover {
-  background-color: #e9e9e9;
+.visitor-detail {
+  width: 7em;
+  height: 1.7em;
+  font-size: 16px;
+  background-color: #97999b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  margin-right: 5px;
+  cursor: pointer;
 }
 
-/* Imagem do visitante */
-.visitor-photo {
-  max-width: 100px;
+
+.visitor-create {
+  width: 7em;
+  height: 1.7em;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
   border-radius: 4px;
-  margin-top: 10px;
+  margin-right: 5px;
+  cursor: pointer;
 }
+
+.visitor-edit {
+  width: 7em;
+  height: 1.7em;
+  font-size: 16px;
+  background-color: #02b111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 
 /* Estilização do modal de edição */
 .edit-modal {
@@ -86,26 +112,6 @@ table tr:hover {
   gap: 10px;
 }
 
-.edit-modal form input {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.edit-modal form button {
-  padding: 10px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.edit-modal form button:hover {
-  background-color: #0056b3;
-}
 
 .photo-container {
   display: flex;
@@ -115,9 +121,9 @@ table tr:hover {
 }
 
 .visitor-photo {
-  width: 120px; /* Ajuste conforme necessário */
-  height: 120px;
-  object-fit: cover;
+  width: 150px; 
+  height: 130px;
+  object-fit:cover;
   border-radius: 8px;
   margin-top: 5px;
   border: 2px solid #ddd;

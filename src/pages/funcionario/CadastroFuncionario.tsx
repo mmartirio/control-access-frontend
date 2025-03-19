@@ -7,11 +7,17 @@ interface Funcionario {
   rg: string;
   phone: string;
   email: string;
+  username: string;
   password: string;
+  role: "ROLE_ADMIN" | "ROLE_USER";
+  credentialsNonExpired: boolean;
+  accountNonLocked: boolean;
+  accountNonExpired: boolean;
+  enabled: boolean;
 }
 
 interface CadastroFuncionarioProps {
-  setFuncionarios: Dispatch<SetStateAction<Funcionario[]>>; // Propriedade para setFuncionarios
+  setFuncionarios: Dispatch<SetStateAction<Funcionario[]>>;
 }
 
 const CadastroFuncionario: React.FC<CadastroFuncionarioProps> = ({ setFuncionarios }) => {
@@ -21,51 +27,71 @@ const CadastroFuncionario: React.FC<CadastroFuncionarioProps> = ({ setFuncionari
     rg: "",
     phone: "",
     email: "",
+    username: "",
     password: "",
+    role: "ROLE_USER",
+    credentialsNonExpired: true,
+    accountNonLocked: true,
+    accountNonExpired: true,
+    enabled: true,
   });
-  const [error, setError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const getAuthToken = () => {
-    return localStorage.getItem("authToken");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
+    
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = getAuthToken();
-    if (!token) {
-      setError("Token de autenticação não encontrado.");
-      return;
-    }
-
-    setLoading(true); // Ativa o loading enquanto o cadastro é feito
 
     try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        alert("Usuário não autenticado. Faça login novamente.");
+        return;
+      }
+      
+      setLoading(true);
       const response = await fetch("http://localhost:8080/api/employees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Adiciona o token no cabeçalho
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         alert("Funcionário cadastrado com sucesso!");
-        setFuncionarios((prev) => [...prev, formData]); // Atualiza a lista de funcionários no componente pai
-        setFormData({ name: "", surName: "", rg: "", phone: "", email: "", password: "" });
+        setFormData({
+          name: "",
+          surName: "",
+          rg: "",
+          phone: "",
+          email: "",
+          username: "",
+          password: "",
+          role: "ROLE_USER",
+          credentialsNonExpired: true,
+          accountNonLocked: true,
+          accountNonExpired: true,
+          enabled: true,
+        });
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Erro ao cadastrar funcionário");
+        alert(errorData.message || "Erro ao cadastrar funcionário.");
       }
     } catch (error) {
-      setError("Erro ao cadastrar funcionário.");
+      alert("Erro de conexão com o servidor.");
     } finally {
-      setLoading(false); // Desativa o loading após o processo
+      setLoading(false);
     }
   };
 
@@ -73,56 +99,39 @@ const CadastroFuncionario: React.FC<CadastroFuncionarioProps> = ({ setFuncionari
     <div className="cad-container">
       <h2>Cadastrar Funcionário</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Nome"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="surName"
-          placeholder="Sobrenome"
-          value={formData.surName}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="rg"
-          placeholder="RG"
-          value={formData.rg}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="phone"
-          placeholder="Telefone"
-          value={formData.phone}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="E-mail"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Senha"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        {["name", "surName", "rg", "phone", "email", "username", "password"].map((field) => (
+          <input
+            key={field}
+            type={field === "email" ? "email" : field === "password" ? "password" : "text"}
+            name={field}
+            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+            value={formData[field as keyof Funcionario] as string}
+            onChange={handleChange}
+            required
+          />
+        ))}
 
-        {error && <div className="error-message">{error}</div>}
+        <div className="role-select">
+          <label htmlFor="role">Role:</label>
+          <select name="role" value={formData.role} onChange={handleChange} required>
+            <option value="ROLE_USER">Usuário</option>
+            <option value="ROLE_ADMIN">Administrador</option>
+          </select>
+        </div>
+
+        {[
+          { label: "Credenciais Não Expiradas", name: "credentialsNonExpired" },
+          { label: "Conta Não Bloqueada", name: "accountNonLocked" },
+          { label: "Conta Não Expirada", name: "accountNonExpired" },
+          { label: "Usuário Ativo", name: "enabled" },
+        ].map(({ label, name }) => (
+          <div key={name} className="checkbox-group">
+            <label>
+              <input type="checkbox" name={name} checked={formData[name as keyof Funcionario] as boolean} onChange={handleChange} />
+              {label}
+            </label>
+          </div>
+        ))}
 
         <div className="cad-button">
           <button type="submit" disabled={loading}>

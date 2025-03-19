@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import './CriaVisita.css'
 
 interface CriarVisitaProps {
-  visitor: { id: number; name: string; surname: string };
+  visitor: { id: number; name: string; surName: string };
   onClose: () => void;
 }
 
@@ -49,7 +49,7 @@ const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose }) => {
     e.preventDefault();
 
     // Verificar se o nome e sobrenome do visitante não estão vazios
-    if (!visitor.name || !visitor.surname) {
+    if (!visitor.name || !visitor.surName) {
       alert("Nome e sobrenome do visitante são obrigatórios.");
       return;
     }
@@ -57,8 +57,8 @@ const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose }) => {
     // Dados da visita
     const visitData = {
       visitorId: visitor.id,
-      visitorName: visitor.name, // Usando os dados do visitor diretamente
-      visitorSurName: visitor.surname, // Usando os dados do visitor diretamente
+      visitorName: visitor.name, 
+      visitorSurName: visitor.surName, 
       sector,
       responsibleEmployeeId, 
       visitReason: reason,
@@ -100,7 +100,7 @@ const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose }) => {
 
   return (
     <div className="cria-container">
-      <h3>Criar Visita para {visitor.name} {visitor.surname}</h3>
+      <h3>Criar Visita para {visitor.name} {visitor.surName}</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Setor</label>

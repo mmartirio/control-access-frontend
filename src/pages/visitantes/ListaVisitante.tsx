@@ -3,13 +3,14 @@ import GenericModal from "../../components/GenericModal";
 import "./ListaVisitante.css";
 import CriarVisita from "../visitas/CriarVisita";
 
+
 interface Visitor {
   id: number;
   name: string;
-  surname: string;
+  surName: string;
   rg: string;
   phone: string;
-  photoUrl?: string;
+  photo?: string;
 }
 
 const ListaVisitantes: React.FC = () => {
@@ -61,31 +62,30 @@ const ListaVisitantes: React.FC = () => {
 
   const filteredVisitors = visitors.filter(visitor => 
     visitor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    visitor.surname.toLowerCase().includes(searchQuery.toLowerCase())
+    visitor.surName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleViewDetails = (visitor: Visitor) => {
     const details = (
       <div>
-        <h3>{visitor.name} {visitor.surname}</h3>
+        <p><strong>Nome:</strong> {visitor.name} {visitor.surName}</p>
         <p><strong>RG:</strong> {visitor.rg}</p>
         <p><strong>Telefone:</strong> {visitor.phone}</p>
-        {visitor.photoUrl ? (
-  <div className="photo-container">
-    <strong>Foto:</strong> 
-    <img 
-      src={visitor.photoUrl.startsWith("data:image")
-        ? visitor.photoUrl 
-        : `data:image/jpeg;base64,${visitor.photoUrl}`
-      } 
-      alt={`${visitor.name} ${visitor.surname}`} 
-      className="visitor-photo" 
-    />
-  </div>
-) : (
-  <p><strong>Foto:</strong> Não disponível</p>
-)}
-
+        {visitor.photo ? (
+          <div className="photo-container">
+            <strong></strong> 
+            <img 
+              src={visitor.photo.startsWith("data:image")
+                ? visitor.photo 
+                : `data:image/jpeg;base64,${visitor.photo}`
+              } 
+              alt={`${visitor.name} ${visitor.surName}`} 
+              className="visitor-photo" 
+            />
+          </div>
+        ) : (
+          <p><strong>Foto:</strong> Não disponível</p>
+        )}
       </div>
     );
     openModalWithContent(details);
@@ -97,97 +97,97 @@ const ListaVisitantes: React.FC = () => {
   };
 
   const handleEditVisitor = async (visitor: Visitor) => {
-    setCurrentVisitor(visitor); // Define o visitante a ser editado
+    setCurrentVisitor(visitor);
+  
     const editForm = (
-      <div className='edit-modal'>
+      <div className="edit-modal">
         <h3>Editar dados do visitante</h3>
-        <form onSubmit={async (e) => {
-          e.preventDefault();
-
-          if (!currentVisitor) return; // Caso não haja visitante sendo editado
-
-          // Captura os dados do formulário
-          const formData = new FormData(e.target as HTMLFormElement);
-          const updatedVisitor = {
-            ...currentVisitor,
-            name: formData.get("name") as string,
-            surname: formData.get("surname") as string,
-            rg: formData.get("rg") as string,
-            phone: formData.get("phone") as string,
-          };
-
-          try {
-            const token = localStorage.getItem("authToken");
-            if (!token) {
-              alert("Usuário não autenticado.");
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+  
+            if (!currentVisitor) return;
+  
+            const formData = new FormData(e.target as HTMLFormElement);
+            const updatedVisitor = {
+              ...currentVisitor,
+              name: formData.get("name") as string,
+              surName: formData.get("surname") as string,
+              rg: formData.get("rg") as string,
+              phone: formData.get("phone") as string,
+            };
+  
+            if (!updatedVisitor.id) {
+              console.error("ID do visitante está indefinido.");
+              alert("Erro: ID do visitante não encontrado.");
               return;
             }
-
-            console.log("Tentando atualizar visitante:", updatedVisitor); // Log do visitante sendo enviado para atualização
-
-            const response = await fetch(`http://localhost:8080/api/visitors/${updatedVisitor.id}`, {
-              method: "PUT",
-              headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(updatedVisitor),
-            });
-
-            if (response.ok) {
+  
+            try {
+              const token = localStorage.getItem("authToken");
+              if (!token) {
+                alert("Usuário não autenticado.");
+                return;
+              }
+  
+              const apiUrl = `http://localhost:8080/api/visitors/${updatedVisitor.id}`;
+              console.log("URL da requisição:", apiUrl);
+  
+              const payload = {
+                name: updatedVisitor.name,
+                surname: updatedVisitor.surName,
+                rg: updatedVisitor.rg,
+                phone: updatedVisitor.phone,
+              };
+  
+              // 🔹 **Otimização do fetch** (tratamento de erros aprimorado)
+              const response = await fetch(apiUrl, {
+                method: "PUT",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+              });
+  
+              if (!response.ok) {
+                throw new Error(`Erro: ${response.status} - ${await response.text()}`);
+              }
+  
               alert("Dados do visitante atualizados com sucesso!");
-              setModalOpen(false); // Fecha o modal após a atualização
-              setVisitors(prevVisitors =>
-                prevVisitors.map(visitor =>
-                  visitor.id === updatedVisitor.id ? updatedVisitor : visitor
-                )
-              ); // Atualiza a lista de visitantes
-            } else {
+              setModalOpen(false);
+              setVisitors((prevVisitors) =>
+                prevVisitors.map((v) => (v.id === updatedVisitor.id ? updatedVisitor : v))
+              );
+            } catch (error) {
               alert("Erro ao atualizar os dados do visitante.");
-              console.error("Erro ao atualizar os dados do visitante", response.statusText); // Log do erro
+              console.error("Erro ao atualizar os dados:", error);
             }
-          } catch (error) {
-            alert("Erro ao conectar ao servidor.");
-            console.error("Erro ao conectar ao servidor: ", error); // Log de erro
-          }
-        }}>
-          <input 
-            type="text" 
-            defaultValue={visitor.name} 
-            name="name"
-          />
-          <input 
-            type="text" 
-            defaultValue={visitor.surname} 
-            name="surname"
-          />
-          <input 
-            type="text" 
-            defaultValue={visitor.rg} 
-            name="rg"
-          />
-          <input 
-            type="text" 
-            defaultValue={visitor.phone} 
-            name="phone"
-          />
+          }}
+        >
+          <input type="text" defaultValue={visitor.name} name="name" />
+          <input type="text" defaultValue={visitor.surName} name="surname" />
+          <input type="text" defaultValue={visitor.rg} name="rg" />
+          <input type="text" defaultValue={visitor.phone} name="phone" />
           <button type="submit">Salvar alterações</button>
         </form>
       </div>
     );
+  
     openModalWithContent(editForm);
   };
+  
 
   return (
     <div className="visitor-list">
       <h2>Lista de Visitantes</h2>
       <div className='searchQuery'>
-      <input 
-        type="text" 
-        placeholder="Pesquisar Visitantes" 
-        value={searchQuery} 
-        onChange={handleSearchChange} 
-      />
+        <input 
+          type="text" 
+          placeholder="Pesquisar Visitantes" 
+          value={searchQuery} 
+          onChange={handleSearchChange} 
+        />
       </div>
       <table>
         <thead>
@@ -201,13 +201,13 @@ const ListaVisitantes: React.FC = () => {
         <tbody>
           {filteredVisitors.map((visitor) => (
             <tr key={visitor.id}>
-              <td>{visitor.name} {visitor.surname}</td>
+              <td>{visitor.name} {visitor.surName}</td>
               <td>{visitor.rg}</td>
               <td>{visitor.phone}</td>
               <td>
-                <button onClick={() => handleViewDetails(visitor)}>Ver detalhes</button>
-                <button onClick={() => handleCreateVisit(visitor)}>Criar Visita</button>
-                <button onClick={() => handleEditVisitor(visitor)}>Editar</button> {/* Chama o handleEditVisitor */}
+                <button className='visitor-detail' onClick={() => handleViewDetails(visitor)}>Ver detalhes</button>
+                <button className='visitor-create' onClick={() => handleCreateVisit(visitor)}>Criar Visita</button>
+                <button className='visitor-edit' onClick={() => handleEditVisitor(visitor)}>Editar</button> 
               </td>
             </tr>
           ))}

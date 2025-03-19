@@ -6,11 +6,13 @@ import ListaVisitas from "../pages/visitas/ListaVisitas";
 import ListaVisitante from "../pages/visitantes/ListaVisitante";
 import Home from "../pages/home/Home";
 import "./Header.css";
+import AreaFuncionario from "../pages/funcionario/AreaFuncionario";
 
 const Header = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
   const [activeComponent, setActiveComponent] = useState<React.ReactNode>(<Home />);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const openModal = (content: React.ReactNode) => {
     setModalContent(content);
@@ -21,6 +23,10 @@ const Header = () => {
     setActiveComponent(component);
     setModalOpen(false); 
   };
+
+  if (isAdmin) {
+    return <AreaFuncionario />;
+  }
 
   return (
     <header>
@@ -33,6 +39,7 @@ const Header = () => {
           <li><button onClick={() => openModal(<CadastroVisitante />)}>Cadastrar Visitante</button></li>
           <li><button onClick={() => handleLinkClick(<ListaVisitas />)}>Lista de Visitas</button></li>
           <li><button onClick={() => handleLinkClick(<ListaVisitante />)}>Lista de Visitantes</button></li>
+          <li><button onClick={() => setIsAdmin(true)}>Área Administrador</button></li>
           <li className='closed'><Link to="/">Sair</Link></li>
         </ul>
       </nav>

@@ -8,8 +8,8 @@ const CadastroVisitante: React.FC = () => {
     surName: "",
     rg: "",
     phone: "",
+    photo: "", // Armazena a imagem como Base64
   });
-  const [photo, setPhoto] = useState<File | null>(null); // Foto como File
   const [showCamera, setShowCamera] = useState(false);
   const [buttonText, setButtonText] = useState("Foto");
   const webcamRef = useRef<Webcam | null>(null);
@@ -22,56 +22,29 @@ const CadastroVisitante: React.FC = () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
-        const byteArray = dataURItoBlob(imageSrc); // Função para converter dataURI para Blob
-        const photoFile = new File([byteArray], "visitor-photo.jpg", { type: "image/jpeg" });
-
-        setPhoto(photoFile); // Armazena o arquivo de foto
-        sessionStorage.setItem("visitorPhoto", imageSrc); // Opcional, pode ser removido
-        setShowCamera(false); // Fecha a câmera após tirar a foto
-        setButtonText("Foto"); // Reseta o texto do botão
+        setFormData({ ...formData, photo: imageSrc }); // Armazena diretamente como Base64
+        sessionStorage.setItem("visitorPhoto", imageSrc); // Opcional
+        setShowCamera(false);
+        setButtonText("Foto");
       }
     }
   };
 
-  // Função para converter base64 (dataURI) para Blob
-  const dataURItoBlob = (dataURI: string): Blob => {
-    const byteString = atob(dataURI.split(",")[1]);
-    const arrayBuffer = new ArrayBuffer(byteString.length);
-    const uintArray = new Uint8Array(arrayBuffer);
-
-    for (let i = 0; i < byteString.length; i++) {
-      uintArray[i] = byteString.charCodeAt(i);
-    }
-
-    return new Blob([uintArray], { type: "image/jpeg" });
-  };
-
   const handleButtonClick = () => {
     if (!showCamera) {
-      setShowCamera(true); // Exibe a câmera para tirar a foto
-      setButtonText("Capturar Foto"); // Muda o texto do botão
+      setShowCamera(true);
+      setButtonText("Capturar Foto");
     } else {
-      capturePhoto(); // Captura a foto
+      capturePhoto();
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Valida o campo "sobrenome"
     if (!formData.surName.trim()) {
       alert("Sobrenome não pode ser vazio.");
       return;
-    }
-
-    const visitorData = new FormData();
-    visitorData.append("name", formData.name);
-    visitorData.append("surName", formData.surName);
-    visitorData.append("rg", formData.rg);
-    visitorData.append("phone", formData.phone);
-
-    if (photo) {
-      visitorData.append("photo", photo); // Adiciona o arquivo de foto ao FormData
     }
 
     try {
@@ -85,15 +58,15 @@ const CadastroVisitante: React.FC = () => {
       const response = await fetch("http://localhost:8080/api/visitors", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`, // Adiciona o token no cabeçalho
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
-        body: visitorData, // Envia o FormData com os dados e a foto
+        body: JSON.stringify(formData), // Envia como JSON
       });
 
       if (response.ok) {
         alert("Visitante cadastrado com sucesso!");
-        setFormData({ name: "", surName: "", rg: "", phone: "" });
-        setPhoto(null);
+        setFormData({ name: "", surName: "", rg: "", phone: "", photo: "" });
         sessionStorage.removeItem("visitorPhoto");
       } else {
         alert("Erro ao cadastrar visitante.");
@@ -146,9 +119,9 @@ const CadastroVisitante: React.FC = () => {
           </div>
         )}
 
-        {photo && (
+        {formData.photo && (
           <div className="photo-preview">
-            <img src={URL.createObjectURL(photo)} alt="Foto do visitante" />
+            <img src={formData.photo} alt="Foto do visitante" />
           </div>
         )}
 

@@ -1,0 +1,106 @@
+/* Estilos gerais para a lista de funcionários */
+.lista-funcionarios {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.lista-funcionarios h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.searchList {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5em;
+}
+
+.searchList input{
+  width: 30em;
+  height: 2em;
+  padding: 0 5px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Tabela de funcionários */
+.table-funcionarios {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.table-funcionarios th,
+.table-funcionarios td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.table-funcionarios th {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 1rem;
+}
+
+.table-funcionarios td {
+  background-color: #f9f9f9;
+  font-size: 0.95rem;
+}
+
+.table-funcionarios tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Estilo para botões de ação */
+.button-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.button-container button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.button-container button.edit {
+  background-color: #ff9800;
+  color: white;
+}
+
+.button-container button.delete {
+  background-color: #f44336;
+  color: white;
+}
+
+.button-container button:hover {
+  opacity: 0.8;
+}
+
+.button-container button:focus {
+  outline: none;
+}
+
+/* Estilo de mensagens de erro ou sucesso */
+.message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #4caf50;
+  margin-top: 10px;
+}
+
+.message.error {
+  color: #f44336;
+}
