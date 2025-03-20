@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import GenericModal from "../../components/GenericModal";
 import CadastroFuncionario from "./CadastroFuncionario";
 import ListaFuncionarios from "./ListaFuncionario";
-import EditaFuncionario from "./EditaFuncionario";
 import "./AreaFuncionario.css";
 
 
@@ -37,11 +36,6 @@ const AreaFuncionario = () => {
     setModalOpen(true);
   };
 
-  const handleLinkClick = (component: React.ReactNode) => {
-    setActiveComponent(component);
-    setModalOpen(false);
-  };
-
   const handleLogout = () => {
     navigate("/header"); 
     window.location.reload();
@@ -57,11 +51,6 @@ const AreaFuncionario = () => {
           <li>
             <button onClick={() => openModal(<CadastroFuncionario setFuncionarios={setFuncionarios} />)}>
               Cadastrar Funcionário
-            </button>
-          </li>
-          <li>
-            <button onClick={() => openModal(<EditaFuncionario setFuncionarios={setFuncionarios} funcionarios={funcionarios} />)}>
-              Editar Funcionário
             </button>
           </li>
           <li className="closed">

@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
 import GenericModal from "../../components/GenericModal";
+import EditaFuncionario from "../../pages/funcionario/EditaFuncionario";
+import DeleteFuncionario from "../../pages/funcionario/DeleteFuncionario";
 import "./ListaFuncionario.css";
 
-interface Funcionario {
+export interface Funcionario {
   id: number;
   name: string;
   surName: string;
-  username: string;
   rg: string;
   phone: string;
   email: string;
-  role: string;
+  username: string;
+  password: string;
+  role: "ROLE_ADMIN" | "ROLE_USER";
+  credentialsNonExpired: boolean;
+  accountNonLocked: boolean;
+  accountNonExpired: boolean;
+  enabled: boolean;
 }
 
 const ListaFuncionarios: React.FC = () => {
@@ -35,12 +42,15 @@ const ListaFuncionarios: React.FC = () => {
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setFuncionarios(data);
-        } else {
-          alert("Erro ao buscar funcionários.");
+        if (!response.ok) {
+          throw new Error("Erro ao buscar funcionários.");
         }
+
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+          throw new Error("Dados inválidos recebidos da API.");
+        }
+        setFuncionarios(data);
       } catch (error) {
         alert("Erro ao conectar ao servidor.");
         console.error("Erro ao conectar ao servidor: ", error);
@@ -50,11 +60,6 @@ const ListaFuncionarios: React.FC = () => {
     fetchFuncionarios();
   }, []);
 
-  const openModalWithContent = (content: React.ReactNode) => {
-    setModalContent(content);
-    setModalOpen(true);
-  };
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -63,37 +68,47 @@ const ListaFuncionarios: React.FC = () => {
     const query = searchQuery.toLowerCase();
     const role = funcionario.role === "ROLE_ADMIN" ? "Administrador" : "Usuário";
 
-    return [funcionario.name, funcionario.surName, funcionario.username, funcionario.rg, funcionario.phone, funcionario.email, role].some(
-      (valor) => valor.toLowerCase().includes(query)
-    );
+    return [
+      funcionario.name,
+      funcionario.surName,
+      funcionario.username,
+      funcionario.rg,
+      funcionario.phone,
+      funcionario.email,
+      role,
+    ].some((valor) => valor?.toLowerCase().includes(query));
   });
 
-  const handleViewDetails = (funcionario: Funcionario) => {
-    const details = (
-      <div>
-        <p>
-          <strong>Nome:</strong> {funcionario.name} {funcionario.surName}
-        </p>
-        <p>
-          <strong>Username:</strong> {funcionario.username}
-        </p>
-        <p>
-          <strong>RG:</strong> {funcionario.rg}
-        </p>
-        <p>
-          <strong>Telefone:</strong> {funcionario.phone}
-        </p>
-        <p>
-          <strong>Email:</strong> {funcionario.email}
-        </p>
-        <p>
-          <strong>Cargo:</strong> {funcionario.role === "ROLE_ADMIN" ? "Administrador" : "Usuário"}
-        </p>
-      </div>
-    );
-    openModalWithContent(details);
+  const openModalWithContent = (content: React.ReactNode) => {
+    setModalContent(content);
+    setModalOpen(true);
   };
 
+  const handleEditFuncionario = (funcionario: Funcionario) => {
+    openModalWithContent(
+      <EditaFuncionario
+        selectedFuncionario={funcionario}
+        setFuncionarios={setFuncionarios}
+        funcionarios={funcionarios}
+        closeModal={() => setModalOpen(false)}
+      />
+    );
+  };
+
+  const handleDeleteFuncionario = (funcionario: Funcionario) => {
+    openModalWithContent(
+      <DeleteFuncionario
+        funcionario={funcionario}
+        onConfirmDelete={(id: number) => {  // Definir explicitamente o tipo do parâmetro
+          // Atualiza o estado de funcionários para refletir a exclusão
+          setFuncionarios((prevFuncionarios) =>
+            prevFuncionarios.filter((func) => func.id !== id)
+          );
+        }}
+        closeModal={() => setModalOpen(false)}
+      />
+    );
+  };
   return (
     <div className="funcionario-list">
       <h2>Lista de Funcionários</h2>
@@ -109,7 +124,7 @@ const ListaFuncionarios: React.FC = () => {
             <th>Telefone</th>
             <th>Email</th>
             <th>Cargo</th>
-            <th>Detalhes</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -122,8 +137,11 @@ const ListaFuncionarios: React.FC = () => {
               <td>{funcionario.email}</td>
               <td>{funcionario.role === "ROLE_ADMIN" ? "Administrador" : "Usuário"}</td>
               <td>
-                <button className="funcionario-detail" onClick={() => handleViewDetails(funcionario)}>
-                  Ver detalhes
+                <button className="funcionario-edit" onClick={() => handleEditFuncionario(funcionario)}>
+                  Editar
+                </button>
+                <button className="funcionario-delete" onClick={() => handleDeleteFuncionario(funcionario)}>
+                  Excluir
                 </button>
               </td>
             </tr>
@@ -137,5 +155,6 @@ const ListaFuncionarios: React.FC = () => {
     </div>
   );
 };
+
 
 export default ListaFuncionarios;
