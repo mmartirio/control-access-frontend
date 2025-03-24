@@ -5,7 +5,7 @@ interface EditaFuncionarioProps {
   selectedFuncionario: Funcionario | null;
   setFuncionarios: React.Dispatch<React.SetStateAction<Funcionario[]>>;
   funcionarios: Funcionario[];
-  closeModal: () => void; // Função para fechar o modal
+  closeModal: () => void; 
 }
 
 const EditaFuncionario: React.FC<EditaFuncionarioProps> = ({

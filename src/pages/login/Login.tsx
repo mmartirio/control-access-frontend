@@ -24,13 +24,14 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Salvar token e informações do usuário no sessionStorage
         if (data.token && data.role) {
           sessionStorage.setItem("authToken", data.token);
-          sessionStorage.setItem("user", JSON.stringify({ role: data.role }));
+          sessionStorage.setItem("user", JSON.stringify({ 
+            role: data.role,
+            username: username
+          }));
 
-          // Redirecionar para o Header onde será feito o controle de redirecionamento
-          navigate("/header");
+          navigate("/header"); 
         } else {
           setErrorMessage("Resposta inválida do servidor");
         }

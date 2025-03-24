@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import GenericModal from "../components/GenericModal";
 import CadastroVisitante from "../pages/visitantes/CadastroVisitante";
 import ListaVisitas from "../pages/visitas/ListaVisitas";
 import ListaVisitante from "../pages/visitantes/ListaVisitante";
 import Home from "../pages/home/Home";
 import "./Header.css";
-import AreaFuncionario from "../pages/funcionario/AreaFuncionario"; // Importe a área de admin se necessário
 
 const Header = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -19,7 +18,7 @@ const Header = () => {
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
     if (user?.role === "ROLE_ADMIN") {
-      setIsAdmin(true); // Se for admin, seta isAdmin como true
+      setIsAdmin(true);
     }
   }, []);
 
@@ -34,7 +33,12 @@ const Header = () => {
   };
 
   const goToAdminArea = () => {
-    navigate("/areaAdministrador"); 
+    navigate("/AreaAdministrador"); 
+  };
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    navigate("/login");
   };
 
   return (
@@ -50,13 +54,18 @@ const Header = () => {
           <li><button onClick={() => handleLinkClick(<ListaVisitante />)}>Lista de Visitantes</button></li>
           
           {/* Mostrar o botão "Área Administrador" apenas se o usuário for admin */}
-          {isAdmin && <li><button onClick={goToAdminArea}>Área Administrador</button></li>}
+          {isAdmin && (
+            <li>
+              <button onClick={goToAdminArea}>Área Administrador</button>
+            </li>
+          )}
 
-          <li className="closed"><Link to="/">Sair</Link></li>
+          <li className="closed">
+            <button onClick={handleLogout}>Sair</button>
+          </li>
         </ul>
       </nav>
 
-      {/* Renderização do componente ativo */}
       {activeComponent}
 
       <GenericModal isOpen={modalOpen} onClose={() => setModalOpen(false)}>

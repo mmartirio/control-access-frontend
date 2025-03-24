@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import GenericModal from "../../components/GenericModal";
 import EditaFuncionario from "../../pages/funcionario/EditaFuncionario";
 import DeleteFuncionario from "../../pages/funcionario/DeleteFuncionario";
@@ -25,40 +26,58 @@ const ListaFuncionarios: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFuncionarios = async () => {
       try {
-        const token = localStorage.getItem("authToken");
+        setLoading(true);
+        setError(null);
+        
+        const token = sessionStorage.getItem("authToken");
         if (!token) {
-          alert("Usuário não autenticado.");
+          navigate("/login");
           return;
         }
 
         const response = await fetch("http://localhost:8080/api/employees", {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
+          credentials: "include"
         });
 
+        if (response.status === 401) {
+          sessionStorage.clear();
+          navigate("/login");
+          return;
+        }
+
         if (!response.ok) {
-          throw new Error("Erro ao buscar funcionários.");
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Erro ao buscar funcionários");
         }
 
         const data = await response.json();
         if (!Array.isArray(data)) {
-          throw new Error("Dados inválidos recebidos da API.");
+          throw new Error("Formato de dados inválido");
         }
+        
         setFuncionarios(data);
       } catch (error) {
-        alert("Erro ao conectar ao servidor.");
-        console.error("Erro ao conectar ao servidor: ", error);
+        console.error("Erro ao buscar funcionários:", error);
+        setError(error instanceof Error ? error.message : "Erro desconhecido");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchFuncionarios();
-  }, []);
+  }, [navigate]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -95,59 +114,113 @@ const ListaFuncionarios: React.FC = () => {
     );
   };
 
-  const handleDeleteFuncionario = (funcionario: Funcionario) => {
+  const handleDeleteFuncionario = async (funcionario: Funcionario) => {
     openModalWithContent(
       <DeleteFuncionario
         funcionario={funcionario}
-        onConfirmDelete={(id: number) => {  // Definir explicitamente o tipo do parâmetro
-          // Atualiza o estado de funcionários para refletir a exclusão
-          setFuncionarios((prevFuncionarios) =>
-            prevFuncionarios.filter((func) => func.id !== id)
-          );
+        onConfirmDelete={async (id: number) => {
+          try {
+            const token = sessionStorage.getItem("authToken");
+            if (!token) {
+              navigate("/login");
+              return;
+            }
+
+            const response = await fetch(`http://localhost:8080/api/employees/${id}`, {
+              method: "DELETE",
+              headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+              },
+              credentials: "include"
+            });
+
+            if (response.status === 401) {
+              sessionStorage.clear();
+              navigate("/login");
+              return;
+            }
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || "Erro ao excluir funcionário");
+            }
+
+            setFuncionarios(prev => prev.filter(func => func.id !== id));
+            setModalOpen(false);
+          } catch (error) {
+            console.error("Erro ao excluir funcionário:", error);
+            alert(error instanceof Error ? error.message : "Erro ao excluir funcionário");
+          }
         }}
         closeModal={() => setModalOpen(false)}
       />
     );
   };
+
+  if (loading) {
+    return <div className="loading">Carregando...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
   return (
     <div className="funcionario-list">
       <h2>Lista de Funcionários</h2>
       <div className="searchList">
-        <input type="text" placeholder="Pesquisar Funcionários" value={searchQuery} onChange={handleSearchChange} />
+        <input
+          type="text"
+          placeholder="Pesquisar Funcionários"
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Username</th>
-            <th>RG</th>
-            <th>Telefone</th>
-            <th>Email</th>
-            <th>Cargo</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredFuncionarios.map((funcionario) => (
-            <tr key={funcionario.id}>
-              <td>{`${funcionario.name} ${funcionario.surName}`}</td>
-              <td>{funcionario.username}</td>
-              <td>{funcionario.rg}</td>
-              <td>{funcionario.phone}</td>
-              <td>{funcionario.email}</td>
-              <td>{funcionario.role === "ROLE_ADMIN" ? "Administrador" : "Usuário"}</td>
-              <td>
-                <button className="funcionario-edit" onClick={() => handleEditFuncionario(funcionario)}>
-                  Editar
-                </button>
-                <button className="funcionario-delete" onClick={() => handleDeleteFuncionario(funcionario)}>
-                  Excluir
-                </button>
-              </td>
+      
+      {filteredFuncionarios.length === 0 ? (
+        <div className="no-results">Nenhum funcionário encontrado</div>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Username</th>
+              <th>RG</th>
+              <th>Telefone</th>
+              <th>Email</th>
+              <th>Cargo</th>
+              <th>Ações</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredFuncionarios.map((funcionario) => (
+              <tr key={funcionario.id}>
+                <td>{`${funcionario.name} ${funcionario.surName}`}</td>
+                <td>{funcionario.username}</td>
+                <td>{funcionario.rg}</td>
+                <td>{funcionario.phone}</td>
+                <td>{funcionario.email}</td>
+                <td>{funcionario.role === "ROLE_ADMIN" ? "Administrador" : "Usuário"}</td>
+                <td>
+                  <button
+                    className="funcionario-edit"
+                    onClick={() => handleEditFuncionario(funcionario)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="funcionario-delete"
+                    onClick={() => handleDeleteFuncionario(funcionario)}
+                  >
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       <GenericModal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         {modalContent}
@@ -155,6 +228,5 @@ const ListaFuncionarios: React.FC = () => {
     </div>
   );
 };
-
 
 export default ListaFuncionarios;

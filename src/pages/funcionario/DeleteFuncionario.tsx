@@ -1,49 +1,38 @@
-import { Funcionario } from "./ListaFuncionario"; 
+import React from "react";
 
-const DeleteFuncionario: React.FC<{
-  funcionario: Funcionario;
-  onConfirmDelete: (id: number) => void;  // Callback para a exclusão
-  closeModal: () => void;
-}> = ({ funcionario, onConfirmDelete, closeModal }) => {
-  const handleDelete = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        alert("Usuário não autenticado.");
-        return;
-      }
-  
-      const response = await fetch(`http://localhost:8080/api/employees/${funcionario.id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();  // Pegando a mensagem de erro do servidor
-        throw new Error(`Erro ao excluir funcionário: ${errorText || response.statusText}`);
-      }
-  
-      alert("Funcionário excluído com sucesso!");
-      onConfirmDelete(funcionario.id);  // Atualiza a lista de funcionários
-      closeModal();  // Fecha o modal de confirmação
-    } catch (error: unknown) {
-      // Verifica se o erro é uma instância de Error
-      if (error instanceof Error) {
-        alert(error.message || "Erro ao conectar ao servidor.");
-        console.error("Erro ao conectar ao servidor: ", error);
-      } else {
-        alert("Erro desconhecido ao tentar excluir o funcionário.");
-      }
-    }
+interface DeleteFuncionarioProps {
+  funcionario: {
+    id: number;
+    name: string;
+    surName: string;
   };
-  
+  onConfirmDelete: (id: number) => void;
+  closeModal: () => void;
+}
+
+const DeleteFuncionario: React.FC<DeleteFuncionarioProps> = ({
+  funcionario,
+  onConfirmDelete,
+  closeModal,
+}) => {
   return (
-    <div>
-      <p>Tem certeza de que deseja excluir {funcionario.name}?</p>
-      <button onClick={handleDelete}>Excluir</button>
-      <button onClick={closeModal}>Cancelar</button>
+    <div className="delete-funcionario-modal">
+      <h3>Confirmar Exclusão</h3>
+      <p>
+        Tem certeza de que deseja excluir o funcionário{" "}
+        <strong>
+          {funcionario.name} {funcionario.surName}
+        </strong>
+        ?
+      </p>
+      <div className="modal-actions">
+        <button className="cancel-button" onClick={closeModal}>
+          Cancelar
+        </button>
+        <button className="delete-button" onClick={() => onConfirmDelete(funcionario.id)}>
+          Excluir
+        </button>
+      </div>
     </div>
   );
 };

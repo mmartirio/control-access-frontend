@@ -66,30 +66,31 @@
   margin-top: 20px;
 }
 
-.button-container button {
-  padding: 10px 20px;
-  font-size: 1rem;
+.funcionario-edit, .funcionario-delete {
+  padding: 3px 15px;
+  font-size: .8em;
+  font-weight: 500;
   margin: 5px;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
 }
 
-.button-container button.edit {
-  background-color: #ff9800;
+.funcionario-edit {
+  background-color: #ec8f02;
   color: white;
 }
 
-.button-container button.delete {
-  background-color: #f44336;
+.funcionario-delete {
+  background-color: #f52d1f;
   color: white;
 }
 
-.button-container button:hover {
+.funcionario-edit:hover, .funcionario-delete:hover {
   opacity: 0.8;
 }
 
-.button-container button:focus {
+.funcionario-delete:focus, .funcionario-edit:focus {
   outline: none;
 }
 

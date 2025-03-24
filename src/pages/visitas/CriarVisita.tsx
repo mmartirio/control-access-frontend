@@ -1,140 +1,247 @@
-import React, { useState, useEffect } from "react";
-import './CriaVisita.css'
+import React, { useState, useEffect } from 'react';
+import './CriaVisita.css';
 
-interface CriarVisitaProps {
-  visitor: { id: number; name: string; surName: string };
-  onClose: () => void;
+// Tipos de dados
+interface Employee {
+  id: number;
+  name: string;
+  surName: string;
 }
 
-const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose }) => {
-  const [sector, setSector] = useState("");
-  const [responsibleEmployeeId, setResponsibleEmployeeId] = useState<number | string>(""); 
-  const [reason, setReason] = useState("");
-  const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]); 
+interface Visitor {
+  id: number;
+  name: string;
+  surName: string;
+}
 
+interface VisitData {
+  visitorId: number;
+  visitorName: string;
+  visitorSurName: string;
+  sector: string;
+  responsibleEmployeeId: number;
+  visitReason: string;
+  visitDate: string;
+}
+
+interface CriarVisitaProps {
+  visitor: Visitor;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose, onSuccess }) => {
+  // Estados do componente
+  const [formData, setFormData] = useState({
+    sector: '',
+    responsibleEmployeeId: '',
+    reason: ''
+  });
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState({
+    employees: true,
+    submitting: false
+  });
+  const [error, setError] = useState('');
+
+  // Buscar lista de funcionários ao carregar o componente
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-
+        const token = sessionStorage.getItem('authToken');
         if (!token) {
-          alert("Usuário não autenticado. Faça login novamente.");
-          return;
+          throw new Error('Usuário não autenticado');
         }
 
-        const response = await fetch("http://localhost:8080/api/employees", {
-          method: "GET",
+        const response = await fetch('http://localhost:8080/api/employees', {
+          method: 'GET',
           headers: {
-            "Authorization": `Bearer ${token}`,
-          },
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setEmployees(data);
-        } else {
-          const errorText = await response.text();
-          alert(`Erro ao carregar funcionários. Status: ${response.status}. ${errorText}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Erro ao carregar funcionários');
         }
-      } catch (error) {
-        console.error("Erro ao buscar funcionários:", error);
-        alert("Erro ao buscar funcionários.");
+
+        const data: Employee[] = await response.json();
+        setEmployees(data);
+      } catch (err) {
+        console.error('Erro ao buscar funcionários:', err);
+        setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      } finally {
+        setLoading(prev => ({ ...prev, employees: false }));
       }
     };
 
     fetchEmployees();
   }, []);
 
+  // Manipulador de mudanças nos campos do formulário
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Enviar dados da visita
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Verificar se o nome e sobrenome do visitante não estão vazios
-    if (!visitor.name || !visitor.surName) {
-      alert("Nome e sobrenome do visitante são obrigatórios.");
-      return;
-    }
-
-    // Dados da visita
-    const visitData = {
-      visitorId: visitor.id,
-      visitorName: visitor.name, 
-      visitorSurName: visitor.surName, 
-      sector,
-      responsibleEmployeeId, 
-      visitReason: reason,
-      visitDate: new Date().toISOString(),
-    };
+    setLoading(prev => ({ ...prev, submitting: true }));
+    setError('');
 
     try {
-      const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        alert("Usuário não autenticado. Faça login novamente.");
-        return;
+      // Validações
+      if (!visitor.name || !visitor.surName) {
+        throw new Error('Nome e sobrenome do visitante são obrigatórios');
       }
 
-      const response = await fetch("http://localhost:8080/api/visits", {
-        method: "POST",
+      if (!formData.responsibleEmployeeId) {
+        throw new Error('Selecione um funcionário responsável');
+      }
+
+      const token = sessionStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
+      // Preparar dados para envio
+      const visitData: VisitData = {
+        visitorId: visitor.id,
+        visitorName: visitor.name,
+        visitorSurName: visitor.surName,
+        sector: formData.sector,
+        responsibleEmployeeId: Number(formData.responsibleEmployeeId),
+        visitReason: formData.reason,
+        visitDate: new Date().toISOString()
+      };
+
+      // Enviar requisição
+      const response = await fetch('http://localhost:8080/api/visits', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(visitData),
+        body: JSON.stringify(visitData)
       });
 
-      if (response.ok) {
-        alert("Visita criada com sucesso!");
-        setSector("");
-        setResponsibleEmployeeId(""); 
-        setReason("");
-        onClose();
-      } else {
-        const errorText = await response.text();
-        alert(`Erro ao criar visita. Status: ${response.status}. ${errorText}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao criar visita');
       }
-    } catch (error) {
-      console.error("Erro ao conectar ao servidor:", error);
-      alert("Erro ao conectar ao servidor.");
+
+      // Sucesso - limpar formulário e fechar
+      setFormData({
+        sector: '',
+        responsibleEmployeeId: '',
+        reason: ''
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+      onClose();
+    } catch (err) {
+      console.error('Erro ao criar visita:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao criar visita');
+    } finally {
+      setLoading(prev => ({ ...prev, submitting: false }));
     }
   };
 
+  // Renderização condicional
+  if (loading.employees) {
+    return (
+      <div className="loading-container">
+        <p>Carregando lista de funcionários...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p className="error-message">{error}</p>
+        <button onClick={onClose} className="close-button">
+          Fechar
+        </button>
+      </div>
+    );
+  }
+
+  // Renderização principal
   return (
-    <div className="cria-container">
-      <h3>Criar Visita para {visitor.name} {visitor.surName}</h3>
-      <form onSubmit={handleSubmit}>
+    <div className="cria-visita-container">
+      <h2 className="visita-title">
+        Criar Visita para {visitor.name} {visitor.surName}
+      </h2>
+
+      <form onSubmit={handleSubmit} className="visita-form">
         <div className="form-group">
-          <label>Setor</label>
-          <input 
-            type="text" 
-            value={sector} 
-            onChange={(e) => setSector(e.target.value)} 
-            required 
+          <label htmlFor="sector">Setor:</label>
+          <input
+            type="text"
+            id="sector"
+            name="sector"
+            value={formData.sector}
+            onChange={handleInputChange}
+            required
+            className="form-input"
           />
         </div>
+
         <div className="form-group">
-          <label>Funcionário Responsável</label>
+          <label htmlFor="responsibleEmployeeId">Funcionário Responsável:</label>
           <select
-            value={responsibleEmployeeId}
-            onChange={(e) => setResponsibleEmployeeId(e.target.value)}
+            id="responsibleEmployeeId"
+            name="responsibleEmployeeId"
+            value={formData.responsibleEmployeeId}
+            onChange={handleInputChange}
             required
+            className="form-select"
           >
             <option value="">Selecione um funcionário</option>
-            {employees.map((employee) => (
+            {employees.map(employee => (
               <option key={employee.id} value={employee.id}>
-                {employee.name}
+                {employee.name} {employee.surName}
               </option>
             ))}
           </select>
         </div>
+
         <div className="form-group">
-          <label>Motivo da Visita</label>
-          <textarea 
-            value={reason} 
-            onChange={(e) => setReason(e.target.value)} 
-            required 
+          <label htmlFor="reason">Motivo da Visita:</label>
+          <textarea
+            id="reason"
+            name="reason"
+            value={formData.reason}
+            onChange={handleInputChange}
+            required
+            className="form-textarea"
           />
         </div>
-        <button type="submit">Criar Visita</button>
+
+        <div className="form-actions">
+          <button
+            type="submit"
+            disabled={loading.submitting}
+            className="submit-button"
+          >
+            {loading.submitting ? 'Enviando...' : 'Criar Visita'}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="cancel-button"
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
   );
