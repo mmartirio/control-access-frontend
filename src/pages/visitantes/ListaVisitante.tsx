@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import GenericModal from "../../components/GenericModal";
-import "./ListaVisitante.css";
+import EditaVisitante from "./EditaVisitante";
 import CriarVisita from "../visitas/CriarVisita";
-
+import "./ListaVisitante.css";
 
 interface Visitor {
-  id: number;
+  id: number;  
   name: string;
   surName: string;
   rg: string;
@@ -18,7 +18,6 @@ const ListaVisitantes: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
-  const [currentVisitor, setCurrentVisitor] = useState<Visitor | null>(null); // Estado para armazenar o visitante sendo editado
 
   useEffect(() => {
     const fetchVisitors = async () => {
@@ -44,7 +43,7 @@ const ListaVisitantes: React.FC = () => {
         }
       } catch (error) {
         alert("Erro ao conectar ao servidor.");
-        console.error("Erro ao conectar ao servidor: ", error); // Log de erro
+        console.error("Erro ao conectar ao servidor: ", error);
       }
     };
 
@@ -65,6 +64,16 @@ const ListaVisitantes: React.FC = () => {
     visitor.surName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleEditVisitor = (visitor: Visitor) => {
+    openModalWithContent(
+      <EditaVisitante 
+        visitorId={visitor.id} 
+        onClose={() => setModalOpen(false)}
+        onUpdateVisit={() => console.log("Visita atualizada")}
+      />
+    );
+  };
+
   const handleViewDetails = (visitor: Visitor) => {
     const details = (
       <div>
@@ -73,7 +82,6 @@ const ListaVisitantes: React.FC = () => {
         <p><strong>Telefone:</strong> {visitor.phone}</p>
         {visitor.photo ? (
           <div className="photo-container">
-            <strong></strong> 
             <img 
               src={visitor.photo.startsWith("data:image")
                 ? visitor.photo 
@@ -92,91 +100,8 @@ const ListaVisitantes: React.FC = () => {
   };
 
   const handleCreateVisit = (visitor: Visitor) => {
-    const visitForm = <CriarVisita visitor={visitor} onClose={() => setModalOpen(false)} />;
-    openModalWithContent(visitForm);
+    openModalWithContent(<CriarVisita visitor={visitor} onClose={() => setModalOpen(false)} />);
   };
-
-  const handleEditVisitor = async (visitor: Visitor) => {
-    setCurrentVisitor(visitor);
-  
-    const editForm = (
-      <div className="edit-modal">
-        <h3>Editar dados do visitante</h3>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-  
-            if (!currentVisitor) return;
-  
-            const formData = new FormData(e.target as HTMLFormElement);
-            const updatedVisitor = {
-              ...currentVisitor,
-              name: formData.get("name") as string,
-              surName: formData.get("surname") as string,
-              rg: formData.get("rg") as string,
-              phone: formData.get("phone") as string,
-            };
-  
-            if (!updatedVisitor.id) {
-              console.error("ID do visitante está indefinido.");
-              alert("Erro: ID do visitante não encontrado.");
-              return;
-            }
-  
-            try {
-              const token = localStorage.getItem("authToken");
-              if (!token) {
-                alert("Usuário não autenticado.");
-                return;
-              }
-  
-              const apiUrl = `http://localhost:8080/api/visitors/${updatedVisitor.id}`;
-              console.log("URL da requisição:", apiUrl);
-  
-              const payload = {
-                name: updatedVisitor.name,
-                surname: updatedVisitor.surName,
-                rg: updatedVisitor.rg,
-                phone: updatedVisitor.phone,
-              };
-  
-              // 🔹 **Otimização do fetch** (tratamento de erros aprimorado)
-              const response = await fetch(apiUrl, {
-                method: "PUT",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-              });
-  
-              if (!response.ok) {
-                throw new Error(`Erro: ${response.status} - ${await response.text()}`);
-              }
-  
-              alert("Dados do visitante atualizados com sucesso!");
-              setModalOpen(false);
-              setVisitors((prevVisitors) =>
-                prevVisitors.map((v) => (v.id === updatedVisitor.id ? updatedVisitor : v))
-              );
-            } catch (error) {
-              alert("Erro ao atualizar os dados do visitante.");
-              console.error("Erro ao atualizar os dados:", error);
-            }
-          }}
-        >
-          <input type="text" defaultValue={visitor.name} name="name" />
-          <input type="text" defaultValue={visitor.surName} name="surname" />
-          <input type="text" defaultValue={visitor.rg} name="rg" />
-          <input type="text" defaultValue={visitor.phone} name="phone" />
-          <button type="submit">Salvar alterações</button>
-        </form>
-      </div>
-    );
-  
-    openModalWithContent(editForm);
-  };
-  
 
   return (
     <div className="visitor-list">
@@ -195,7 +120,7 @@ const ListaVisitantes: React.FC = () => {
             <th>Nome</th>
             <th>RG</th>
             <th>Telefone</th>
-            <th>Ações</th>
+            <th className='actions'>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -205,8 +130,8 @@ const ListaVisitantes: React.FC = () => {
               <td>{visitor.rg}</td>
               <td>{visitor.phone}</td>
               <td>
-                <button className='visitor-detail' onClick={() => handleViewDetails(visitor)}>Ver detalhes</button>
-                <button className='visitor-create' onClick={() => handleCreateVisit(visitor)}>Criar Visita</button>
+                <button className='visitor-detail' onClick={() => handleViewDetails(visitor)}>Detalhes</button>
+                <button className='visitor-create-visit' onClick={() => handleCreateVisit(visitor)}>Criar Visita</button>
                 <button className='visitor-edit' onClick={() => handleEditVisitor(visitor)}>Editar</button> 
               </td>
             </tr>

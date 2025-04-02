@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GenericModal from "../components/GenericModal";
 import CadastroVisitante from "../pages/visitantes/CadastroVisitante";
+import CriarVisita from "../pages/visitas/CriarVisita";
 import ListaVisitas from "../pages/visitas/ListaVisitas";
 import ListaVisitante from "../pages/visitantes/ListaVisitante";
 import Home from "../pages/home/Home";
@@ -14,12 +15,9 @@ const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
-  // Verificar o role do usuário no sessionStorage
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-    if (user?.role === "ROLE_ADMIN") {
-      setIsAdmin(true);
-    }
+    setIsAdmin(user?.role === "ROLE_ADMIN");
   }, []);
 
   const openModal = (content: React.ReactNode) => {
@@ -27,9 +25,13 @@ const Header = () => {
     setModalOpen(true);
   };
 
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
   const handleLinkClick = (component: React.ReactNode) => {
     setActiveComponent(component);
-    setModalOpen(false);
+    closeModal();
   };
 
   const goToAdminArea = () => {
@@ -41,6 +43,16 @@ const Header = () => {
     navigate("/login");
   };
 
+  const handleVisitorCreated = (visitorId: number) => {
+    closeModal();
+    openModal(
+      <CriarVisita 
+        visitor={{ id: visitorId, name: "", surName: "" }} 
+        onClose={closeModal}
+      />
+    );
+  };
+
   return (
     <header>
       <nav>
@@ -49,11 +61,19 @@ const Header = () => {
         </div>
         <ul>
           <li><button onClick={() => handleLinkClick(<Home />)}>Home</button></li>
-          <li><button onClick={() => openModal(<CadastroVisitante />)}>Cadastrar Visitante</button></li>
+          <li>
+            <button onClick={() => openModal(
+              <CadastroVisitante 
+                onClose={closeModal} 
+                onCreateVisit={handleVisitorCreated} 
+              />
+            )}>
+              Cadastrar Visitante
+            </button>
+          </li>
           <li><button onClick={() => handleLinkClick(<ListaVisitas />)}>Lista de Visitas</button></li>
           <li><button onClick={() => handleLinkClick(<ListaVisitante />)}>Lista de Visitantes</button></li>
           
-          {/* Mostrar o botão "Área Administrador" apenas se o usuário for admin */}
           {isAdmin && (
             <li>
               <button onClick={goToAdminArea}>Área Administrador</button>
@@ -68,7 +88,7 @@ const Header = () => {
 
       {activeComponent}
 
-      <GenericModal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+      <GenericModal isOpen={modalOpen} onClose={closeModal}>
         {modalContent}
       </GenericModal>
     </header>

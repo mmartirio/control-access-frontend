@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import "./DeleteFuncionario.css"
 
 interface DeleteFuncionarioProps {
   funcionario: {
@@ -15,24 +16,47 @@ const DeleteFuncionario: React.FC<DeleteFuncionarioProps> = ({
   onConfirmDelete,
   closeModal,
 }) => {
+  const [message, setMessage] = useState("");
+  const [isDeleted, setIsDeleted] = useState(false);
+
+  const handleDelete = () => {
+    onConfirmDelete(funcionario.id);
+    setIsDeleted(true);
+
+    setTimeout(() => {
+      closeModal();
+    }, 5000);
+
+    setTimeout(() => {
+      setMessage("Funcionário excluído com sucesso!");
+    }, 1000);
+
+  };
+
   return (
     <div className="delete-funcionario-modal">
       <h3>Confirmar Exclusão</h3>
-      <p>
-        Tem certeza de que deseja excluir o funcionário{" "}
-        <strong>
-          {funcionario.name} {funcionario.surName}
-        </strong>
-        ?
-      </p>
-      <div className="modal-actions">
-        <button className="cancel-button" onClick={closeModal}>
-          Cancelar
-        </button>
-        <button className="delete-button" onClick={() => onConfirmDelete(funcionario.id)}>
-          Excluir
-        </button>
-      </div>
+      {!isDeleted ? (
+        <>
+          <p>
+            Tem certeza de que deseja excluir o funcionário{" "}
+            <strong>
+              {funcionario.name} {funcionario.surName}
+            </strong>
+            ?
+          </p>
+          <div className="modal-actions">
+          <button className="delete-button" onClick={handleDelete}>
+              Excluir
+            </button>
+            <button className="cancel-button" onClick={closeModal}>
+              Cancelar
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="success-message">{message}</p>
+      )}
     </div>
   );
 };

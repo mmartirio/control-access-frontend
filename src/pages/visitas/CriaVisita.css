@@ -1,19 +1,19 @@
-.cria-container {
+.cria-visita-container{
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.cria-container form {
+.cria-visita-container form {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: .5em;
+  gap: .8em;
   flex-wrap: wrap;
 }
 
-.cria-container form input {
+.cria-visita-container form input {
   display: block;
   width: 18em;
   height: 1.5em;
@@ -21,27 +21,22 @@
   cursor: pointer;
 }
 
-.cria-container select {
-  display: block;
-  height: 2em;
-  width: 18.5em;
-  outline: none;
-  cursor: pointer;
-}
-
-.cria-container form button {
-  background-color: rgb(113, 223, 40);
+.cria-visita-container form button {
+  background-color: #02b111;
+  border: none;
+  padding: 4px 15px;
   border-radius: 5px;
+  text-align: center;
   font-size: 15px;
-  font-weight: bold;
-  color: #050505;
+  font-weight: 500;
+  color: #ffffff;
 }
 
-.cria-container form button:hover {
+.cria-visita-container form button:hover {
   background-color: rgb(89, 177, 31);
 }
 
-.cria-container form button:active {
+.cria-visita-container form button:active {
   background-color: rgb(58, 141, 3);
 }
 
@@ -52,4 +47,13 @@
   resize: none;
   outline: none;
   cursor: pointer;
+}
+
+.visita-title, .visita-name {
+  margin: 0;
+}
+
+.form-time {
+  display: flex;
+  justify-content: space-between;
 }

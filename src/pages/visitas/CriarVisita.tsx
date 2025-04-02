@@ -1,27 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './CriaVisita.css';
-
-// Tipos de dados
-interface Employee {
-  id: number;
-  name: string;
-  surName: string;
-}
 
 interface Visitor {
   id: number;
   name: string;
   surName: string;
-}
-
-interface VisitData {
-  visitorId: number;
-  visitorName: string;
-  visitorSurName: string;
-  sector: string;
-  responsibleEmployeeId: number;
-  visitReason: string;
-  visitDate: string;
 }
 
 interface CriarVisitaProps {
@@ -30,57 +13,46 @@ interface CriarVisitaProps {
   onSuccess?: () => void;
 }
 
+interface JwtPayload {
+  exp?: number;
+}
+
 const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose, onSuccess }) => {
-  // Estados do componente
   const [formData, setFormData] = useState({
+    visitReason: '',
     sector: '',
-    responsibleEmployeeId: '',
-    reason: ''
+    responsibleName: ''
   });
-  const [employees, setEmployees] = useState<Employee[]>([]);
+
   const [loading, setLoading] = useState({
-    employees: true,
     submitting: false
   });
   const [error, setError] = useState('');
 
-  // Buscar lista de funcionários ao carregar o componente
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const token = sessionStorage.getItem('authToken');
-        if (!token) {
-          throw new Error('Usuário não autenticado');
-        }
-
-        const response = await fetch('http://localhost:8080/api/employees', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Erro ao carregar funcionários');
-        }
-
-        const data: Employee[] = await response.json();
-        setEmployees(data);
-      } catch (err) {
-        console.error('Erro ao buscar funcionários:', err);
-        setError(err instanceof Error ? err.message : 'Erro desconhecido');
-      } finally {
-        setLoading(prev => ({ ...prev, employees: false }));
-      }
+  // Função para formatar data/hora no fuso de Sergipe (apenas para exibição)
+  const getLocalDateTime = () => {
+    const now = new Date();
+    return {
+      date: now.toLocaleDateString('pt-BR', { timeZone: 'America/Recife' }),
+      time: now.toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        timeZone: 'America/Recife'
+      })
     };
+  };
 
-    fetchEmployees();
-  }, []);
+  // Função para gerar data no formato correto para o backend (-03:00)
+  const getCorrectVisitDate = () => {
+    const now = new Date();
+    // Cria uma data artificial no fuso -03:00
+    const fakeLocalDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+    return fakeLocalDate.toISOString().slice(0, -1) + '-03:00';
+  };
 
-  // Manipulador de mudanças nos campos do formulário
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const { date, time } = getLocalDateTime();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -88,100 +60,94 @@ const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose, onSuccess }
     }));
   };
 
-  // Enviar dados da visita
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(prev => ({ ...prev, submitting: true }));
     setError('');
-
+  
     try {
-      // Validações
-      if (!visitor.name || !visitor.surName) {
-        throw new Error('Nome e sobrenome do visitante são obrigatórios');
-      }
-
-      if (!formData.responsibleEmployeeId) {
-        throw new Error('Selecione um funcionário responsável');
-      }
-
-      const token = sessionStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken') || localStorage.getItem('authToken');
+      
       if (!token) {
-        throw new Error('Sessão expirada. Faça login novamente.');
+        throw new Error('Token de autenticação não encontrado. Faça login novamente.');
       }
 
-      // Preparar dados para envio
-      const visitData: VisitData = {
-        visitorId: visitor.id,
-        visitorName: visitor.name,
-        visitorSurName: visitor.surName,
-        sector: formData.sector,
-        responsibleEmployeeId: Number(formData.responsibleEmployeeId),
-        visitReason: formData.reason,
-        visitDate: new Date().toISOString()
-      };
-
-      // Enviar requisição
+      // Verificação segura do token expirado
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1])) as JwtPayload;
+        if (payload.exp && Date.now() >= payload.exp * 1000) {
+          throw new Error('Sessão expirada. Faça login novamente.');
+        }
+      } catch (e) {
+        console.warn('Erro ao verificar token:', e);
+      }
+  
+      if (!formData.responsibleName.trim()) {
+        throw new Error('Informe o nome do responsável');
+      }
+  
       const response = await fetch('http://localhost:8080/api/visits', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(visitData)
+        body: JSON.stringify({
+          visitReason: formData.visitReason,
+          sector: formData.sector,
+          visitDate: getCorrectVisitDate(), // Usando a função corrigida
+          visitorId: visitor.id,
+          responsibleName: formData.responsibleName
+        })
       });
-
+  
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erro ao criar visita');
+        if (response.status === 403) {
+          throw new Error('Acesso negado. Verifique suas permissões.');
+        }
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `Erro ${response.status}: ${response.statusText}`);
       }
-
-      // Sucesso - limpar formulário e fechar
-      setFormData({
-        sector: '',
-        responsibleEmployeeId: '',
-        reason: ''
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      }
+  
+      if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao criar visita';
+      setError(errorMessage);
       console.error('Erro ao criar visita:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao criar visita');
+      
+      if (errorMessage.includes('403') || errorMessage.includes('Sessão expirada')) {
+        sessionStorage.removeItem('authToken');
+        localStorage.removeItem('authToken');
+      }
     } finally {
       setLoading(prev => ({ ...prev, submitting: false }));
     }
   };
 
-  // Renderização condicional
-  if (loading.employees) {
-    return (
-      <div className="loading-container">
-        <p>Carregando lista de funcionários...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="error-container">
-        <p className="error-message">{error}</p>
-        <button onClick={onClose} className="close-button">
-          Fechar
-        </button>
-      </div>
-    );
-  }
-
-  // Renderização principal
   return (
     <div className="cria-visita-container">
-      <h2 className="visita-title">
-        Criar Visita para {visitor.name} {visitor.surName}
-      </h2>
+      <h2 className="visita-title">Criar Visita para </h2>
+      <h2 className='visita-name'>{visitor.name} {visitor.surName}</h2>
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="visita-form">
+        <div className="form-time">
+          <div className="datetime-display">
+            <label>Data:</label>
+            {date}
+          </div>
+          <div className="datetime-display">
+            <label>Hora:</label>
+            {time}
+          </div>
+        </div>
+
         <div className="form-group">
           <label htmlFor="sector">Setor:</label>
           <input
@@ -191,37 +157,38 @@ const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose, onSuccess }
             value={formData.sector}
             onChange={handleInputChange}
             required
+            minLength={2}
+            maxLength={50}
             className="form-input"
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="responsibleEmployeeId">Funcionário Responsável:</label>
-          <select
-            id="responsibleEmployeeId"
-            name="responsibleEmployeeId"
-            value={formData.responsibleEmployeeId}
+          <label htmlFor="responsibleName">Responsável:</label>
+          <input
+            type="text"
+            id="responsibleName"
+            name="responsibleName"
+            value={formData.responsibleName}
             onChange={handleInputChange}
             required
-            className="form-select"
-          >
-            <option value="">Selecione um funcionário</option>
-            {employees.map(employee => (
-              <option key={employee.id} value={employee.id}>
-                {employee.name} {employee.surName}
-              </option>
-            ))}
-          </select>
+            minLength={2}
+            maxLength={100}
+            className="form-input"
+            placeholder="Nome do responsável"
+          />
         </div>
 
         <div className="form-group">
-          <label htmlFor="reason">Motivo da Visita:</label>
+          <label htmlFor="visitReason">Motivo da Visita:</label>
           <textarea
-            id="reason"
-            name="reason"
-            value={formData.reason}
+            id="visitReason"
+            name="visitReason"
+            value={formData.visitReason}
             onChange={handleInputChange}
             required
+            minLength={2}
+            maxLength={100}
             className="form-textarea"
           />
         </div>
@@ -233,13 +200,6 @@ const CriarVisita: React.FC<CriarVisitaProps> = ({ visitor, onClose, onSuccess }
             className="submit-button"
           >
             {loading.submitting ? 'Enviando...' : 'Criar Visita'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="cancel-button"
-          >
-            Cancelar
           </button>
         </div>
       </form>

@@ -189,7 +189,7 @@ const ListaFuncionarios: React.FC = () => {
               <th>RG</th>
               <th>Telefone</th>
               <th>Email</th>
-              <th>Cargo</th>
+              <th>Perfil</th>
               <th>Ações</th>
             </tr>
           </thead>

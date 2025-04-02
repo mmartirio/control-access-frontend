@@ -15,13 +15,11 @@
   color: #333;
 }
 
-/* Container do campo de pesquisa */
 .searchQuery {
   margin-bottom: 20px;
   text-align: center;
 }
 
-/* Estilização do input de pesquisa */
 .searchQuery input {
   width: 30em;
   padding: 10px;
@@ -32,28 +30,35 @@
   outline: none;
 }
 
-/* Estilização da tabela */
+
 table {
-  width: 100%;
+  width: 80%;
   border-collapse: collapse;
   margin: 0 auto;
 }
 
 table th,
 table td {
-  border: 1px solid #ddd;
   padding: 12px;
-  text-align: left;
+  text-align: center;
+}
+
+.actions {
+  align-items: center;
 }
 
 table th {
-  background-color: #f2f2f2;
+  background-color: #d6d4d4;
   font-weight: bold;
   color: #555;
 }
 
 table tr:nth-child(even) {
   background-color: #f9f9f9;
+}
+
+table tr:hover {
+  background-color: #f3f2f2;
 }
 
 .visitor-detail {
@@ -69,7 +74,7 @@ table tr:nth-child(even) {
 }
 
 
-.visitor-create {
+.visitor-create-visit {
   width: 7em;
   height: 1.7em;
   font-size: 16px;

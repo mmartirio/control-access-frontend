@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Funcionario } from "./ListaFuncionario";
+import "./EditaFuncionario.css";
 
 interface EditaFuncionarioProps {
   selectedFuncionario: Funcionario | null;
@@ -69,7 +70,10 @@ const EditaFuncionario: React.FC<EditaFuncionarioProps> = ({
     <div>
       {selectedFuncionario ? (
         <>
-          <h3>Editar Funcionário: {selectedFuncionario.name}</h3>
+        <div className="edita-funcionario-container">
+          <h3>Editar Funcionário</h3>
+          <h3>{selectedFuncionario.name}</h3>
+          <div className="edita-funcionario-form ">
           <div>
             <label>Nome</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
@@ -86,6 +90,8 @@ const EditaFuncionario: React.FC<EditaFuncionarioProps> = ({
             <label>Senha</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
+          </div>
+          <div className="edita-funcionario-checkbox">
           <div>
             <label>Credenciais Não Expiradas</label>
             <input
@@ -118,7 +124,10 @@ const EditaFuncionario: React.FC<EditaFuncionarioProps> = ({
               onChange={(e) => setEnabled(e.target.checked)}
             />
           </div>
+          </div>
           <button onClick={handleSave}>Salvar</button>
+
+        </div>
         </>
       ) : (
         <p>Funcionário não encontrado.</p>
