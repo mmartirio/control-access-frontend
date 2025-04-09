@@ -1,54 +1,81 @@
-# React + TypeScript + Vite
+# Control Access Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este é o frontend do sistema de controle de acesso, desenvolvido com React, TypeScript e Vite. Ele fornece uma interface para gerenciar visitantes, funcionários e visitas, com autenticação e autorização baseadas em permissões.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js (versão 16 ou superior)
+- npm (gerenciador de pacotes do Node.js)
 
-## Expanding the ESLint configuration
+## Instalação
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Clone este repositório:
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+   ```bash
+   git clone https://github.com/seu-usuario/control-access-frontend.git
+   cd control-access-frontend
+   ```
+
+2. Instale as dependências:
+
+   ```bash
+   npm install
+   ```
+
+## Uso
+
+### Ambiente de Desenvolvimento
+
+Para iniciar o servidor de desenvolvimento, execute:
+
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+O projeto estará disponível em `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Build para Produção
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Para gerar os arquivos otimizados para produção, execute:
+
+```bash
+npm run build
 ```
+
+Os arquivos serão gerados na pasta `dist`.
+
+### Pré-visualização do Build
+
+Para pré-visualizar o build de produção, execute:
+
+```bash
+npm run preview
+```
+
+### Lint
+
+Para verificar e corrigir problemas de lint, execute:
+
+```bash
+npm run lint
+```
+
+## Estrutura do Projeto
+
+- `src/`: Contém o código-fonte do projeto.
+  - `components/`: Componentes reutilizáveis, como modais e cabeçalhos.
+  - `pages/`: Páginas principais do sistema, como login, lista de visitantes e área do funcionário.
+  - `App.tsx`: Configuração das rotas do sistema.
+  - `ProtectedRoute.tsx`: Gerenciamento de rotas protegidas.
+- `public/`: Arquivos estáticos, como imagens.
+- `vite.config.ts`: Configuração do Vite.
+
+## Configuração do Backend
+
+Este projeto depende de um backend para autenticação e gerenciamento de dados. Certifique-se de que o backend esteja rodando em `http://localhost:8080` ou ajuste a configuração de proxy no arquivo [`vite.config.ts`](vite.config.ts).
+
+O repositório do backend pode ser encontrado [aqui](https://github.com/mmartirio/controlAccess).
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT. Consulte o arquivo `LICENSE` para mais detalhes.
