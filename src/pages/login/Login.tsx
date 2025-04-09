@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import './Login.css';
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
@@ -59,17 +61,25 @@ const Login = () => {
               required
             />
           </div>
-          <div>
+          <div className="password-wrapper">
+            <div>
             <label htmlFor="password">Senha:</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            </div>
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
           </div>
-          <button type="submit">Entrar</button>
+          <button className="btn-login" type="submit">Entrar</button>
         </form>
         {errorMessage && <div className="error-message">{errorMessage}</div>}
       </div>

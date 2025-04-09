@@ -28,12 +28,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
   padding: .3em .5em;
   font-size: 14pt;
 }
 
-.login-container form button {
+.login-container .btn-login {
   padding: .4em 6.7em;
   background-color: #2d9bf5;
   color: #fff;
@@ -43,12 +43,50 @@
   border: none;
 }
 
-.login-container form button:hover {
+.login-container .btn-login:hover {
   background-color: #004d80;
 }
 
-.login-container form button:active {
+.login-container .btn-login:active {
   background-color: #004966;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; 
+  box-sizing: border-box;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #555;
+}
+
+.password-wrapper button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 38px;
+  border: 1px solid #757474;
+  border-radius: 3px;
+  background-color: #fff;
+  color: #555;
+  font-size: 20px;
+
 }
 
 .area-gestor {

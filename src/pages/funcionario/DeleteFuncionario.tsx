@@ -21,15 +21,12 @@ const DeleteFuncionario: React.FC<DeleteFuncionarioProps> = ({
 
   const handleDelete = () => {
     onConfirmDelete(funcionario.id);
+    setMessage("Funcionário excluído com sucesso!");
     setIsDeleted(true);
 
     setTimeout(() => {
       closeModal();
-    }, 5000);
-
-    setTimeout(() => {
-      setMessage("Funcionário excluído com sucesso!");
-    }, 1000);
+    }, 3000);
 
   };
 
